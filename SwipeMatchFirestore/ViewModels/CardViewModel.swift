@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol ProducesCardViewModel {
+  func toCardViewModel() -> CardViewModel
+}
+
 struct CardViewModel {
   
   let imageName: String
@@ -15,5 +19,4 @@ struct CardViewModel {
   let textAlignment: NSTextAlignment
   
 }
-
 
