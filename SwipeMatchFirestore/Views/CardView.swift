@@ -23,8 +23,11 @@ class CardView: UIView {
         barsStackView.addArrangedSubview(barView)
       }
       barsStackView.arrangedSubviews.first?.backgroundColor = .white
+    
+      setupImageIndexObserver()
     }
   }
+  
   private let imageView = UIImageView(image: #imageLiteral(resourceName: "lady5c"))
   private let informationLabel = UILabel()
   private let gradientLayer = CAGradientLayer()
@@ -46,6 +49,14 @@ class CardView: UIView {
   
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  private func setupImageIndexObserver() {
+    cardViewModel.imageIndexObserver = { [unowned self] (index, image) in
+      self.imageView.image = image
+      self.barsStackView.arrangedSubviews.forEach { $0.backgroundColor = self.barDeselectedColor }
+      self.barsStackView.arrangedSubviews[index].backgroundColor = .white
+    }
   }
   
   private func setupLayout() {
@@ -85,19 +96,14 @@ class CardView: UIView {
   }
   
   @objc private func handleTap(gesture: UITapGestureRecognizer) {
-    print("Subscribe to Pewdiepie")
     let tapLocation = gesture.location(in: nil)
     let shouldAdvanceToNextPhoto = tapLocation.x > (frame.width / 2) ? true : false
+
     if shouldAdvanceToNextPhoto {
-      imageIndex = min(imageIndex + 1, cardViewModel.imageNames.count - 1)
+      cardViewModel.advanceToNextPhoto()
     } else {
-      imageIndex = max(0, imageIndex - 1)
+      cardViewModel.goToPreviousPhoto()
     }
-    
-    let imageName = cardViewModel.imageNames[imageIndex]
-    imageView.image = UIImage(named: imageName)
-    barsStackView.arrangedSubviews.forEach { $0.backgroundColor = barDeselectedColor }
-    barsStackView.arrangedSubviews[imageIndex].backgroundColor = .white
   }
   
   @objc private func handlePan(gesture: UIPanGestureRecognizer) {
@@ -141,8 +147,6 @@ class CardView: UIView {
       if shouldDismissCard {
         self.removeFromSuperview()
       }
-      //self.frame = CGRect(x: 0, y: 0, width: self.superview!.frame.width, height: self.superview!.frame.height)
     })
   }
-  
 }
