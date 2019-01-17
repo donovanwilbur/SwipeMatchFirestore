@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Firebase
+import JGProgressHUD
 
 class RegistrationController: UIViewController {
   
@@ -17,16 +19,19 @@ class RegistrationController: UIViewController {
     button.titleLabel?.font = UIFont.systemFont(ofSize: 32, weight: .heavy)
     button.backgroundColor = .white
     button.setTitleColor(.black, for: .normal)
-    button.heightAnchor.constraint(equalToConstant: 275).isActive = true
     button.layer.cornerRadius = 16
     button.addTarget(self, action: #selector(handleSelectPhotoBtnPressed), for: .touchUpInside)
     return button
   }()
   
+  lazy var selectPhotoButtonWidthAnchor = selectPhotoButton.widthAnchor.constraint(equalToConstant: 275)
+  lazy var selectPhotoButtonHeightAnchor = selectPhotoButton.heightAnchor.constraint(equalToConstant: 275)
+  
   let fullNameTextField: CustomTextField = {
     let textField = CustomTextField(padding: 24, height: 44)
     textField.placeholder = "Enter full name"
     textField.backgroundColor = .white
+    textField.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
     return textField
   }()
   
@@ -34,7 +39,9 @@ class RegistrationController: UIViewController {
     let textField = CustomTextField(padding: 24, height: 44)
     textField.placeholder = "Enter email"
     textField.keyboardType = .emailAddress
+    textField.autocapitalizationType = .none
     textField.backgroundColor = .white
+    textField.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
     return textField
   }()
   
@@ -43,6 +50,7 @@ class RegistrationController: UIViewController {
     textField.placeholder = "Enter password"
     textField.isSecureTextEntry = true
     textField.backgroundColor = .white
+    textField.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
     return textField
   }()
   
@@ -50,8 +58,10 @@ class RegistrationController: UIViewController {
     let button = UIButton(type: .system)
     button.setTitle("Register", for: .normal)
     button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .heavy)
-    button.backgroundColor = #colorLiteral(red: 0.8135682344, green: 0.1019940302, blue: 0.3355026245, alpha: 1)
     button.setTitleColor(.white, for: .normal)
+    button.setTitleColor(.gray, for: .disabled)
+    button.backgroundColor = .lightGray
+    button.isEnabled = false
     button.heightAnchor.constraint(equalToConstant: 44).isActive = true
     button.layer.cornerRadius = 22
     button.addTarget(self, action: #selector(handleRegisterBtnPressed), for: .touchUpInside)
@@ -70,12 +80,17 @@ class RegistrationController: UIViewController {
   
   let gradientLayer = CAGradientLayer()
 
+  let registrationViewModel = RegistrationViewModel()
+  
+  // MARK: - Overrides
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     setupGradientLayer()
     setupLayout()
     setupNotificationObservers()
     setupTapGesture()
+    setupRegistrationViewModelObserver()
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -84,10 +99,33 @@ class RegistrationController: UIViewController {
   }
   
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-    overallStackView.axis = self.traitCollection.verticalSizeClass == .compact ? .horizontal : .vertical
+    if self.traitCollection.verticalSizeClass == .compact {
+      overallStackView.axis = .horizontal
+      verticalStackView.distribution = .fillEqually
+      selectPhotoButtonHeightAnchor.isActive = false
+      selectPhotoButtonWidthAnchor.isActive = true
+    } else {
+      overallStackView.axis = .vertical
+      verticalStackView.distribution = .fill
+      selectPhotoButtonWidthAnchor.isActive = false
+      selectPhotoButtonHeightAnchor.isActive = true
+    }
   }
   
   // MARK: - Private Methods
+  
+  private func setupRegistrationViewModelObserver() {
+    registrationViewModel.isFormValidObserver = { [unowned self] (isFormValid) in
+      self.registerButton.isEnabled = isFormValid
+      if isFormValid {
+        self.registerButton.backgroundColor = #colorLiteral(red: 0.8135682344, green: 0.1019940302, blue: 0.3355026245, alpha: 1)
+        self.registerButton.setTitleColor(.white, for: .normal)
+      } else {
+        self.registerButton.backgroundColor = .lightGray
+        self.registerButton.setTitleColor(.gray, for: .normal)
+      }
+    }
+  }
   
   private func setupTapGesture() {
     view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTapDismiss)))
@@ -121,6 +159,16 @@ class RegistrationController: UIViewController {
     gradientLayer.frame = view.bounds
   }
   
+  @objc private func handleTextChange(textField: UITextField) {
+    if textField == fullNameTextField {
+      registrationViewModel.fullName = textField.text
+    } else if textField == emailTextField {
+      registrationViewModel.email = textField.text
+    } else {
+      registrationViewModel.password = textField.text
+    }
+  }
+  
   @objc private func handleTapDismiss() {
     self.view.endEditing(true)
   }
@@ -148,6 +196,24 @@ class RegistrationController: UIViewController {
   }
   
   @objc private func handleRegisterBtnPressed() {
-    print("Sub to Pewdiepie")
+    self.handleTapDismiss()
+    guard let email = emailTextField.text, let password = passwordTextField.text else { return }
+    Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
+      
+      if let error = error {
+        self.showHUDWithError(error: error)
+        return
+      }
+      
+      print("Successfully registered user:", result?.user.uid ?? "")
+    }
+  }
+  
+  private func showHUDWithError(error: Error) {
+    let hud = JGProgressHUD(style: .dark)
+    hud.textLabel.text = "Failed registration"
+    hud.detailTextLabel.text = error.localizedDescription
+    hud.show(in: self.view)
+    hud.dismiss(afterDelay: 4)
   }
 }
