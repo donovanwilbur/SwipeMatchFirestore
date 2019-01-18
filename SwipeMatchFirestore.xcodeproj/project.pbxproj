@@ -22,6 +22,7 @@
 		25BC6B7021EF80AA00EA1E6B /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BC6B6F21EF80AA00EA1E6B /* CustomTextField.swift */; };
 		25BC6B7221F0D1A200EA1E6B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 25BC6B7121F0D1A200EA1E6B /* GoogleService-Info.plist */; };
 		25BC6B7421F0D87300EA1E6B /* RegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BC6B7321F0D87300EA1E6B /* RegistrationViewModel.swift */; };
+		25BC6B7621F2332600EA1E6B /* Bindable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BC6B7521F2332600EA1E6B /* Bindable.swift */; };
 		25DD934E21E3898700B68424 /* Advertiser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DD934D21E3898700B68424 /* Advertiser.swift */; };
 		4A780C62C7DB91C7CFFE2D4D /* Pods_SwipeMatchFirestore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7685E62FBDF3C6AC25151EB1 /* Pods_SwipeMatchFirestore.framework */; };
 /* End PBXBuildFile section */
@@ -44,6 +45,7 @@
 		25BC6B6F21EF80AA00EA1E6B /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		25BC6B7121F0D1A200EA1E6B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		25BC6B7321F0D87300EA1E6B /* RegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistrationViewModel.swift; sourceTree = "<group>"; };
+		25BC6B7521F2332600EA1E6B /* Bindable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bindable.swift; sourceTree = "<group>"; };
 		25DD934D21E3898700B68424 /* Advertiser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Advertiser.swift; sourceTree = "<group>"; };
 		60BA3B98FF71042A8235E0A1 /* Pods-SwipeMatchFirestore.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwipeMatchFirestore.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SwipeMatchFirestore/Pods-SwipeMatchFirestore.debug.xcconfig"; sourceTree = "<group>"; };
 		7685E62FBDF3C6AC25151EB1 /* Pods_SwipeMatchFirestore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwipeMatchFirestore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,7 @@
 				251FF59421CA7B5500891BA0 /* Views */,
 				251FF59121C92C1A00891BA0 /* Extensions */,
 				251FF57F21C92A4200891BA0 /* AppDelegate.swift */,
+				25BC6B7521F2332600EA1E6B /* Bindable.swift */,
 				251FF58321C92A4200891BA0 /* Main.storyboard */,
 				251FF58621C92A4400891BA0 /* Assets.xcassets */,
 				251FF58821C92A4400891BA0 /* LaunchScreen.storyboard */,
@@ -311,6 +314,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				25BC6B7621F2332600EA1E6B /* Bindable.swift in Sources */,
 				251FF58221C92A4200891BA0 /* HomeController.swift in Sources */,
 				25BC6B7421F0D87300EA1E6B /* RegistrationViewModel.swift in Sources */,
 				25BC6B7021EF80AA00EA1E6B /* CustomTextField.swift in Sources */,

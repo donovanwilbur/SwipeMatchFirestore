@@ -21,6 +21,8 @@ class RegistrationController: UIViewController {
     button.setTitleColor(.black, for: .normal)
     button.layer.cornerRadius = 16
     button.addTarget(self, action: #selector(handleSelectPhotoBtnPressed), for: .touchUpInside)
+    button.imageView?.contentMode = .scaleAspectFill
+    button.clipsToBounds = true
     return button
   }()
   
@@ -112,10 +114,17 @@ class RegistrationController: UIViewController {
     }
   }
   
+  override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    gradientLayer.frame = view.bounds
+  }
+  
   // MARK: - Private Methods
   
   private func setupRegistrationViewModelObserver() {
-    registrationViewModel.isFormValidObserver = { [unowned self] (isFormValid) in
+    registrationViewModel.bindableIsFormValid.bind { [unowned self] (isFormValid) in
+      guard let isFormValid = isFormValid else { return }
+      
       self.registerButton.isEnabled = isFormValid
       if isFormValid {
         self.registerButton.backgroundColor = #colorLiteral(red: 0.8135682344, green: 0.1019940302, blue: 0.3355026245, alpha: 1)
@@ -124,6 +133,10 @@ class RegistrationController: UIViewController {
         self.registerButton.backgroundColor = .lightGray
         self.registerButton.setTitleColor(.gray, for: .normal)
       }
+    }
+    
+    registrationViewModel.bindableImage.bind { [unowned self] (image) in
+      self.selectPhotoButton.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
     }
   }
   
@@ -143,11 +156,6 @@ class RegistrationController: UIViewController {
     overallStackView.spacing = 10
     overallStackView.anchor(top: nil, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 0, left: 50, bottom: 0, right: 50))
     overallStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-  }
-  
-  override func viewWillLayoutSubviews() {
-    super.viewWillLayoutSubviews()
-    gradientLayer.frame = view.bounds
   }
   
   private func setupGradientLayer() {
@@ -193,6 +201,9 @@ class RegistrationController: UIViewController {
   
   @objc private func handleSelectPhotoBtnPressed() {
     print("Sub to Pewds")
+    let imagePickerController = UIImagePickerController()
+    imagePickerController.delegate = self
+    present(imagePickerController, animated: true)
   }
   
   @objc private func handleRegisterBtnPressed() {
@@ -216,4 +227,25 @@ class RegistrationController: UIViewController {
     hud.show(in: self.view)
     hud.dismiss(afterDelay: 4)
   }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+// MARK: -
+extension RegistrationController: UIImagePickerControllerDelegate {
+  func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    dismiss(animated: true)
+  }
+  
+  func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    let image = info[.originalImage] as? UIImage
+    registrationViewModel.bindableImage.value = image
+    //registrationViewModel.image = image
+    dismiss(animated: true)
+  }
+}
+
+// MARK: - UINavigationControllerDelegate
+// MARK: -
+extension RegistrationController: UINavigationControllerDelegate {
+  
 }
