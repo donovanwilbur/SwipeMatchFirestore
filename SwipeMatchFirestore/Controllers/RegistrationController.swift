@@ -30,7 +30,7 @@ class RegistrationController: UIViewController {
   lazy var selectPhotoButtonHeightAnchor = selectPhotoButton.heightAnchor.constraint(equalToConstant: 275)
   
   let fullNameTextField: CustomTextField = {
-    let textField = CustomTextField(padding: 24, height: 44)
+    let textField = CustomTextField(padding: 24, height: 50)
     textField.placeholder = "Enter full name"
     textField.backgroundColor = .white
     textField.addTarget(self, action: #selector(handleTextChange), for: .editingChanged)
@@ -38,7 +38,7 @@ class RegistrationController: UIViewController {
   }()
   
   let emailTextField: CustomTextField = {
-    let textField = CustomTextField(padding: 24, height: 44)
+    let textField = CustomTextField(padding: 24, height: 50)
     textField.placeholder = "Enter email"
     textField.keyboardType = .emailAddress
     textField.autocapitalizationType = .none
@@ -48,7 +48,7 @@ class RegistrationController: UIViewController {
   }()
   
   let passwordTextField: CustomTextField = {
-    let textField = CustomTextField(padding: 24, height: 44)
+    let textField = CustomTextField(padding: 24, height: 50)
     textField.placeholder = "Enter password"
     textField.isSecureTextEntry = true
     textField.backgroundColor = .white
@@ -74,7 +74,7 @@ class RegistrationController: UIViewController {
     let stackView = UIStackView(arrangedSubviews: [fullNameTextField, emailTextField, passwordTextField, registerButton])
     stackView.axis = .vertical
     stackView.distribution = .fillEqually
-    stackView.spacing = 10
+    stackView.spacing = 8
     return stackView
   }()
 
@@ -90,9 +90,12 @@ class RegistrationController: UIViewController {
     super.viewDidLoad()
     setupGradientLayer()
     setupLayout()
-    setupNotificationObservers()
     setupTapGesture()
     setupRegistrationViewModelObserver()
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    setupNotificationObservers()
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -138,6 +141,15 @@ class RegistrationController: UIViewController {
     registrationViewModel.bindableImage.bind { [unowned self] (image) in
       self.selectPhotoButton.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
     }
+    
+    registrationViewModel.bindableIsRegistering.bind { [unowned self] (isRegistering) in
+      if isRegistering == true {
+        self.registeringHUD.textLabel.text = "Register"
+        self.registeringHUD.show(in: self.view)
+      } else {
+        self.registeringHUD.dismiss()
+      }
+    }
   }
   
   private func setupTapGesture() {
@@ -153,7 +165,7 @@ class RegistrationController: UIViewController {
     view.addSubview(overallStackView)
     overallStackView.axis = .horizontal
     selectPhotoButton.widthAnchor.constraint(equalToConstant: 275).isActive = true
-    overallStackView.spacing = 10
+    overallStackView.spacing = 12
     overallStackView.anchor(top: nil, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 0, left: 50, bottom: 0, right: 50))
     overallStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
   }
@@ -206,26 +218,29 @@ class RegistrationController: UIViewController {
     present(imagePickerController, animated: true)
   }
   
+  let registeringHUD = JGProgressHUD(style: .dark)
+  
   @objc private func handleRegisterBtnPressed() {
     self.handleTapDismiss()
-    guard let email = emailTextField.text, let password = passwordTextField.text else { return }
-    Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
-      
+    
+    registrationViewModel.performRegistration { [weak self] (error) in
       if let error = error {
-        self.showHUDWithError(error: error)
+        self?.showHUDWithError(error: error)
         return
       }
       
-      print("Successfully registered user:", result?.user.uid ?? "")
+      print("Finished registering our user.")
+      
     }
   }
   
   private func showHUDWithError(error: Error) {
+    registeringHUD.dismiss()
     let hud = JGProgressHUD(style: .dark)
     hud.textLabel.text = "Failed registration"
     hud.detailTextLabel.text = error.localizedDescription
     hud.show(in: self.view)
-    hud.dismiss(afterDelay: 4)
+    hud.dismiss(afterDelay: 3)
   }
 }
 
