@@ -35,7 +35,8 @@ class HomeController: UIViewController {
   // MARK: - Private methods
   
   private func fetchUsersFromFirestore() {
-    Firestore.firestore().collection("users").getDocuments { (snapshot, error) in
+    let query = Firestore.firestore().collection("users").whereField("age", isEqualTo: 24)
+    query.getDocuments { (snapshot, error) in
       
       if let error = error {
         return
