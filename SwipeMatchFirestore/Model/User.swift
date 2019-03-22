@@ -18,6 +18,9 @@ struct User: ProducesCardViewModel {
   var imageUrl3: String?
   var uid: String?
   
+  var minSeekingAge: Int?
+  var maxSeekingAge: Int?
+  
   init(dictionary: [String: Any]) {
     age = dictionary["age"] as? Int
     profession = dictionary["profession"] as? String
@@ -26,6 +29,8 @@ struct User: ProducesCardViewModel {
     imageUrl2 = dictionary["imageUrl2"] as? String
     imageUrl3 = dictionary["imageUrl3"] as? String
     uid = dictionary["uid"] as? String
+    minSeekingAge = dictionary["minSeekingAge"] as? Int
+    maxSeekingAge = dictionary["maxSeekingAge"] as? Int
   }
   
   func toCardViewModel() -> CardViewModel {

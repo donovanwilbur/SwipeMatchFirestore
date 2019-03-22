@@ -121,7 +121,8 @@ class SettingsController: UITableViewController {
     case 1: headerLabel.text = "Name"
     case 2: headerLabel.text = "Profession"
     case 3: headerLabel.text = "Age"
-    default: headerLabel.text = "Bio"
+    case 4: headerLabel.text = "Bio"
+    default: headerLabel.text = "Seeking Age Range"
     }
     return headerLabel
   }
@@ -134,14 +135,44 @@ class SettingsController: UITableViewController {
   }
   
   override func numberOfSections(in tableView: UITableView) -> Int {
-    return 5
+    return 6
   }
   
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return section == 0 ? 0 : 1
   }
   
+  @objc private func handleMinAgeChange(slider: UISlider) {
+    evaluateMinMax()
+  }
+  
+  @objc private func handleMaxAgeChange(slider: UISlider) {
+    evaluateMinMax()
+  }
+  
+  private func evaluateMinMax() {
+    guard let ageRangeCell = tableView.cellForRow(at: IndexPath(item: 0, section: 5)) as? AgeRangeCell else { return }
+    let minValue = Int(ageRangeCell.minSlider.value)
+    var maxValue = Int(ageRangeCell.maxSlider.value)
+    maxValue = max(minValue, maxValue)
+    ageRangeCell.maxSlider.value = Float(maxValue)
+    ageRangeCell.minLabel.text = "Min \(minValue)"
+    ageRangeCell.maxLabel.text = "Max \(maxValue)"
+    
+    user?.minSeekingAge = minValue
+    user?.maxSeekingAge = maxValue
+  }
+  
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    if indexPath.section == 5 {
+      let ageRangeCell = AgeRangeCell(style: .default, reuseIdentifier: nil)
+      ageRangeCell.minSlider.addTarget(self, action: #selector(handleMinAgeChange), for: .valueChanged)
+      ageRangeCell.maxSlider.addTarget(self, action: #selector(handleMaxAgeChange), for: .valueChanged)
+      ageRangeCell.minLabel.text = "\(user?.minSeekingAge ?? -1)"
+      ageRangeCell.maxLabel.text = "\(user?.maxSeekingAge ?? -1)"
+      return ageRangeCell
+    }
+    
     let cell = SettingsCell(style: .default, reuseIdentifier: nil)
     
     switch indexPath.section {
@@ -200,7 +231,9 @@ class SettingsController: UITableViewController {
                                    "imageUrl2": user?.imageUrl2 ?? "",
                                    "imageUrl3": user?.imageUrl3 ?? "",
                                    "age": user?.age ?? -1,
-                                   "profession": user?.profession ?? "" ]
+                                   "profession": user?.profession ?? "",
+                                   "minSeekingAge": user?.minSeekingAge ?? -1,
+                                   "maxSeekingAge": user?.maxSeekingAge ?? -1]
     
     let hud = JGProgressHUD(style: .dark)
     hud.textLabel.text = "Saving settings"
