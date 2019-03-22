@@ -11,6 +11,10 @@ import Firebase
 import JGProgressHUD
 import SDWebImage
 
+protocol SettingsControllerDelegate: class {
+  func didSaveSettings()
+}
+
 class CustomImagePickerController: UIImagePickerController {
   var imageButton: UIButton?
 }
@@ -20,6 +24,8 @@ class SettingsController: UITableViewController {
   lazy var image1Button = createButton(selector: #selector(handleSelectPhoto))
   lazy var image2Button = createButton(selector: #selector(handleSelectPhoto))
   lazy var image3Button = createButton(selector: #selector(handleSelectPhoto))
+  
+  weak var delegate: SettingsControllerDelegate?
   
   @objc func handleSelectPhoto(button: UIButton) {
     print("Selecting photo with button: \(button)")
@@ -53,17 +59,13 @@ class SettingsController: UITableViewController {
   var user: User?
   
   private func fetchCurrentUser() {
-    guard let uid = Auth.auth().currentUser?.uid else { return }
-    Firestore.firestore().collection("users").document(uid).getDocument { (snapshot, error) in
+    Firestore.firestore().fetchCurrentUser { (user, error) in
       if let error = error {
-        print(error)
+        print("Failed to fetch user:", error)
         return
       }
-      
-      guard let dictionary = snapshot?.data() else { return }
-      self.user = User(dictionary: dictionary)
+      self.user = user
       self.loadUserPhotos()
-      
       self.tableView.reloadData()
     }
   }
@@ -222,9 +224,8 @@ class SettingsController: UITableViewController {
   }
   
   @objc private func handleSave() {
-    print("Save button pressed")
-    
     guard let uid = Auth.auth().currentUser?.uid else { return }
+    
     let docData: [String: Any] = [ "uid": uid,
                                    "fullName": user?.name ?? "",
                                    "imageUrl1": user?.imageUrl1 ?? "",
@@ -245,7 +246,9 @@ class SettingsController: UITableViewController {
         return
       }
       
-      print("Finished saving user info.")
+      self.dismiss(animated: true, completion: {
+        self.delegate?.didSaveSettings()
+      })
     }
   }
 }
